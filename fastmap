@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Verifica se um IP foi fornecido
+if [ -z "$1" ]; then
+    echo "Uso: $0 <IP-ALVO>"
+    exit 1
+fi
+
+# Atribui o primeiro argumento da linha de comando à variável IP_ALVO
+IP_ALVO=$1
+
+# Executa o nmap para identificar portas abertas e depois um scan mais detalhado nas portas encontradas
+ports=$(nmap -Pn -p- --min-rate=1000 -T4 $IP_ALVO | \
+grep '^[0-9]' | \
+cut -d '/' -f 1 | \
+tr '\n' ',' | \
+sed 's/,$//') && \
+nmap -p$ports -Pn -sC -sV $IP_ALVO > nmap.txt
