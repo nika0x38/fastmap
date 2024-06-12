@@ -16,7 +16,7 @@ sudo apt-get install nmap
 Para instalar o `fastmap` em seu sistema e torna-lo um executável, siga os passos abaixo:
 
 ```bash
-git clone https://github.com/gstvalentin/fastmap.git
+git clone https://github.com/wsbwzfyvt/fastmap.git
 cd fastmap
 sudo bash install.sh
 ```
