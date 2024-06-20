@@ -26,7 +26,7 @@ sudo bash install.sh
 Após a instalação, você pode usar o `fastmap` diretamente de qualquer terminal passando o IP alvo como argumento:
 
 ```bash
-fastmap 192.168.1.1
+fastmap <ip_alvo>
 ```
 
 Isso iniciará o processo de escaneamento, e os resultados serão salvos em `nmap.txt` no diretório atual.
