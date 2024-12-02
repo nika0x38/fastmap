@@ -48,7 +48,7 @@ echo "[*] Performing a detailed scan on the open ports ($ports)..."
 output_file="${IP_TARGET}.md"
 nmap_output=$(nmap -p"$ports" -Pn -sC -sV "$IP_TARGET")
 
-echo '```' >> "$output_file"
+echo '```' > "$output_file"
 echo "$nmap_output" >> "$output_file"
 echo '```' >> "$output_file"
 
