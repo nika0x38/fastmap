@@ -7,7 +7,7 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 # Move the script to /usr/local/bin and adjust its permissions
-mv fastmap /usr/local/bin/fastmap
+cp fastmap /usr/local/bin/fastmap
 chmod +x /usr/local/bin/fastmap
 
 echo "fastmap has been successfully installed and is ready to use."
