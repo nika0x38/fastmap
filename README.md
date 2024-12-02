@@ -1,19 +1,14 @@
-# FastMap
+### FastMap
 
-O `fastmap` é uma ferramenta de script shell projetada para automatizar o processo de mapeamento rápido de portas usando o `nmap`. Ele realiza inicialmente um escaneamento rápido de todas portas para identificar portas abertas e, em seguida, executa um escaneamento mais detalhado nas portas encontradas para identificar serviços e vulnerabilidades potenciais e gera um arquivo `nmap.txt` com os resultados do escaneamento.
+`fastmap` is a shell script tool designed to automate the process of quick port mapping using `nmap`. It starts with a rapid scan of all ports to identify open ports and then performs a detailed scan on those ports to identify services and potential vulnerabilities. The results are saved in an `<target-ip>.md` file in the current directory.
 
-## Pré-requisitos
+#### Prerequisites
 
-Antes de usar o `fastmap`, certifique-se de que o `nmap` está instalado em seu sistema. O `nmap` pode ser instalado na maioria das distribuições Linux usando o gerenciador de pacotes padrão. Por exemplo, no Debian-based systems (incluindo Ubuntu e Kali Linux):
+Before using `fastmap`, ensure that `nmap` is installed on your system. `nmap` is available in most Linux distributions and can be installed using the default package manager. 
 
-```bash
-sudo apt-get update
-sudo apt-get install nmap
-```
+#### Installation
 
-## Instalação
-
-Para instalar o `fastmap` em seu sistema e torna-lo um executável, siga os passos abaixo:
+To install `fastmap` on your system and make it executable, follow these steps:
 
 ```bash
 git clone https://github.com/wsbwzfyvt/fastmap.git
@@ -21,17 +16,16 @@ cd fastmap
 sudo bash install.sh
 ```
 
-## Uso
+#### Usage
 
-Após a instalação, você pode usar o `fastmap` diretamente de qualquer terminal passando o IP alvo como argumento:
+After installation, you can use `fastmap` directly from any terminal by passing the target IP as an argument:
 
 ```bash
-fastmap <ip_alvo>
+fastmap <target_ip>
 ```
 
-Isso iniciará o processo de escaneamento, e os resultados serão salvos em `nmap.txt` no diretório atual.
+This will initiate the scanning process, and the results will be saved as `<target-ip>.md` in the current directory.
 
-## Contribuições
+#### Contributions
 
-Contribuições são sempre bem-vindas! Se você tem alguma sugestão para melhorar o `fastmap`, sinta-se à vontade para criar uma issue ou um pull request no repositório.
-
+Contributions are always welcome! If you have any suggestions to improve `fastmap`, feel free to open an issue or submit a pull request on the repository.

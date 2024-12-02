@@ -1,18 +1,52 @@
 #!/bin/bash
+#fastmap
 
-# Verifica se um IP foi fornecido
+# Function to display usage instructions
+usage() {
+    echo "Usage: $0 <IP-TARGET> [-h]"
+    echo
+    echo "Options:"
+    echo "  -h           Display this help message."
+    echo
+    echo "Description:"
+    echo "This script performs a port scan on the target IP using Nmap. It first identifies open ports"
+    echo "and then conducts a more detailed scan on those ports. The results are saved in a Markdown (.md)"
+    echo "file named after the target IP address."
+    exit 0
+}
+
+# Check if the user requested help
+if [[ "$1" == "-h" ]]; then
+    usage
+fi
+
+# Verify that an IP address was provided
 if [ -z "$1" ]; then
-    echo "Uso: $0 <IP-ALVO>"
+    echo "Error: No IP target provided."
+    echo "Use -h for usage instructions."
     exit 1
 fi
 
-# Atribui o primeiro argumento da linha de comando à variável IP_ALVO
-IP_ALVO=$1
+# Assign the first command-line argument to the variable IP_TARGET
+IP_TARGET=$1
 
-# Executa o nmap para identificar portas abertas e depois um scan mais detalhado nas portas encontradas
-ports=$(nmap -Pn -p- --min-rate=1000 -T4 $IP_ALVO | \
+# Perform the initial Nmap scan to find open ports
+echo "[*] Scanning for open ports on $IP_TARGET..."
+ports=$(nmap -Pn -p- --min-rate=1000 -T4 "$IP_TARGET" | \
 grep '^[0-9]' | \
 cut -d '/' -f 1 | \
 tr '\n' ',' | \
-sed 's/,$//') && \
-nmap -p$ports -Pn -sC -sV $IP_ALVO > nmap.txt
+sed 's/,$//')
+
+if [ -z "$ports" ]; then
+    echo "[!] No open ports found on $IP_TARGET."
+    exit 1
+fi
+
+# Perform a detailed scan on the open ports
+echo "[*] Performing a detailed scan on the open ports ($ports)..."
+output_file="${IP_TARGET}.md"
+nmap -p"$ports" -Pn -sC -sV "$IP_TARGET" > "$output_file"
+
+# Notify the user of the saved results
+echo "[+] Scan completed. Results saved to $output_file"

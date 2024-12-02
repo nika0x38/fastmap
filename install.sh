@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Verifica se o script é executado como superusuário para permitir a movimentação do arquivo para /usr/local/bin
+# Check if the script is executed as a superuser to allow moving the file to /usr/local/bin
 if [ "$(id -u)" != "0" ]; then
-    echo "Este script deve ser executado como superusuário" 1>&2
+    echo "This script must be run as a superuser." 1>&2
     exit 1
 fi
 
-# Move o script para /usr/local/bin e ajusta as permissões
+# Move the script to /usr/local/bin and adjust its permissions
 mv fastmap /usr/local/bin/fastmap
 chmod +x /usr/local/bin/fastmap
 
-echo "fastmap instalado com sucesso e está pronto para ser usado."
+echo "fastmap has been successfully installed and is ready to use."
