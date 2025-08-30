@@ -11,9 +11,26 @@ Before using `fastmap`, ensure that `nmap` is installed on your system. `nmap` i
 To install `fastmap` on your system and make it executable, follow these steps:
 
 ```bash
-git clone https://github.com/wsbwzfyvt/fastmap.git
+git clone https://github.com/nika0x38/fastmap.git
 cd fastmap
-sudo bash install.sh
+chmod +x install.sh && bash install.sh
+```
+
+After installation, you may need to restart your terminal or run:
+
+**For Bash users:**
+```bash
+source ~/.bashrc
+```
+
+**For Zsh users:**
+```bash
+source ~/.zshrc
+```
+
+**For other shells:**
+```bash
+source ~/.profile
 ```
 
 #### Usage
@@ -26,6 +43,7 @@ fastmap <target_ip>
 
 This will initiate the scanning process, and the results will be saved as `<target-ip>.md` in the current directory.
 
-#### Contributions
+#### Educational Purpose & CTF Usage
 
-Contributions are always welcome! If you have any suggestions to improve `fastmap`, feel free to open an issue or submit a pull request on the repository.
+This tool is designed for **educational purposes** and **Capture The Flag (CTF)** competitions.
+
