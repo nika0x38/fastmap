@@ -35,13 +35,19 @@ source ~/.profile
 
 #### Usage
 
-After installation, you can use `fastmap` directly from any terminal by passing the target IP as an argument:
+After installation, you can use `fastmap` directly from any terminal:
 
 ```bash
 fastmap <target_ip>
+fastmap -u <target_ip>
+fastmap -h
 ```
 
-This will initiate the scanning process, and the results will be saved as `<target-ip>.md` in the current directory.
+- `fastmap <target_ip>` performs the original TCP workflow: a fast sweep of all ports followed by detailed service detection on anything open.
+- `fastmap -u <target_ip>` runs the TCP workflow and adds a UDP top-ports scan (`sudo nmap -sU -Pn -sV --top-ports 1000 -T4 --reason`).
+- `fastmap -h` displays the built-in help message.
+
+All scan results are saved as `<target-ip>.md` in the current directory, with separate sections for TCP and UDP when both scans are executed.
 
 #### Educational Purpose & CTF Usage
 

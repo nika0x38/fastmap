@@ -3,54 +3,94 @@
 
 # Function to display usage instructions
 usage() {
-    echo "Usage: $0 <IP-TARGET> [-h]"
+    local exit_code="${1:-0}"
+    echo "Usage: $0 [-u] <IP-TARGET>"
     echo
     echo "Options:"
     echo "  -h           Display this help message."
+    echo "  -u           Include a UDP top-ports scan (requires sudo)."
     echo
     echo "Description:"
     echo "This script performs a port scan on the target IP using Nmap. It first identifies open ports"
-    echo "and then conducts a more detailed scan on those ports. The results are saved in a Markdown (.md)"
-    echo "file named after the target IP address."
-    exit 0
+    echo "and then conducts a more detailed scan on those ports. Optionally, it performs a UDP top-ports scan."
+    echo "The results are saved in a Markdown (.md) file named after the target IP address."
+    exit "$exit_code"
 }
 
-# Check if the user requested help
-if [[ "$1" == "-h" ]]; then
-    usage
-fi
+# Parse command-line options
+udp_scan=false
+while getopts ":hu" opt; do
+    case "$opt" in
+        h)
+            usage
+            ;;
+        u)
+            udp_scan=true
+            ;;
+        \?)
+            echo "Error: Invalid option -$OPTARG" >&2
+            usage 1
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
 
 # Verify that an IP address was provided
-if [ -z "$1" ]; then
+if [ $# -lt 1 ]; then
     echo "Error: No IP target provided."
     echo "Use -h for usage instructions."
     exit 1
 fi
 
-# Assign the first command-line argument to the variable IP_TARGET
+# Assign the first non-option argument to the variable IP_TARGET
 IP_TARGET=$1
 
 # Perform the initial Nmap scan to find open ports
-echo "[*] Scanning for open ports on $IP_TARGET..."
+echo "[*] Scanning for open TCP ports on $IP_TARGET..."
 ports=$(nmap -Pn -p- --min-rate=1000 -T4 "$IP_TARGET" | \
 grep '^[0-9]' | \
 cut -d '/' -f 1 | \
 tr '\n' ',' | \
 sed 's/,$//')
 
+output_file="${IP_TARGET}.md"
+
 if [ -z "$ports" ]; then
-    echo "[!] No open ports found on $IP_TARGET."
-    exit 1
+    echo "[!] No open TCP ports found on $IP_TARGET."
+    if [ "$udp_scan" != "true" ]; then
+        exit 1
+    fi
+    {
+        echo "## TCP scan"
+        echo '```'
+        echo "No open TCP ports found."
+        echo '```'
+    } > "$output_file"
+else
+    echo "[*] Performing a detailed TCP scan on the open ports ($ports)..."
+    nmap_output=$(nmap -p"$ports" -Pn -sC -sV "$IP_TARGET")
+
+    {
+        echo "## TCP scan"
+        echo '```'
+        echo "$nmap_output"
+        echo '```'
+    } > "$output_file"
 fi
 
-# Perform a detailed scan on the open ports
-echo "[*] Performing a detailed scan on the open ports ($ports)..."
-output_file="${IP_TARGET}.md"
-nmap_output=$(nmap -p"$ports" -Pn -sC -sV "$IP_TARGET")
+if [ "$udp_scan" = "true" ]; then
+    echo "[*] Performing a UDP top-ports scan on $IP_TARGET..."
+    udp_output=$(sudo nmap -sU -Pn -sV --top-ports 1000 -T4 --reason "$IP_TARGET")
 
-echo '```' > "$output_file"
-echo "$nmap_output" >> "$output_file"
-echo '```' >> "$output_file"
+    {
+        echo
+        echo "## UDP scan (--top-ports 1000)"
+        echo '```'
+        echo "$udp_output"
+        echo '```'
+    } >> "$output_file"
+fi
 
 # Notify the user of the saved results
 echo "[+] Scan completed. Results saved to $output_file"
