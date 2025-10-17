@@ -13,7 +13,7 @@ usage() {
     echo "Description:"
     echo "This script performs a port scan on the target IP using Nmap. It first identifies open ports"
     echo "and then conducts a more detailed scan on those ports. Optionally, it performs a UDP top-ports scan."
-    echo "The results are saved in a Markdown (.md) file named after the target IP address."
+    echo "The results are saved in a txt file named after the target IP address."
     exit "$exit_code"
 }
 
@@ -46,6 +46,17 @@ fi
 # Assign the first non-option argument to the variable IP_TARGET
 IP_TARGET=$1
 
+if [ "$udp_scan" = "true" ]; then
+    echo "[*] UDP scan requested. Validating sudo credentials before scanning..."
+    if ! sudo -v >/dev/null 2>&1; then
+        echo "[!] Unable to obtain sudo privileges. Aborting UDP scan."
+        exit 1
+    fi
+fi
+
+# Record start time for runtime tracking
+start_time=$(date +%s)
+
 # Perform the initial Nmap scan to find open ports
 echo "[*] Scanning for open TCP ports on $IP_TARGET..."
 ports=$(nmap -Pn -p- --min-rate=1000 -T4 "$IP_TARGET" | \
@@ -54,7 +65,7 @@ cut -d '/' -f 1 | \
 tr '\n' ',' | \
 sed 's/,$//')
 
-output_file="${IP_TARGET}.md"
+output_file="${IP_TARGET}.txt"
 
 if [ -z "$ports" ]; then
     echo "[!] No open TCP ports found on $IP_TARGET."
@@ -63,9 +74,7 @@ if [ -z "$ports" ]; then
     fi
     {
         echo "## TCP scan"
-        echo '```'
         echo "No open TCP ports found."
-        echo '```'
     } > "$output_file"
 else
     echo "[*] Performing a detailed TCP scan on the open ports ($ports)..."
@@ -73,24 +82,34 @@ else
 
     {
         echo "## TCP scan"
-        echo '```'
         echo "$nmap_output"
-        echo '```'
     } > "$output_file"
 fi
 
 if [ "$udp_scan" = "true" ]; then
-    echo "[*] Performing a UDP top-ports scan on $IP_TARGET..."
+    echo "[*] Performing a UDP top-ports 1000 scan on $IP_TARGET..."
     udp_output=$(sudo nmap -sU -Pn -sV --top-ports 1000 -T4 --reason "$IP_TARGET")
 
     {
         echo
         echo "## UDP scan (--top-ports 1000)"
-        echo '```'
         echo "$udp_output"
-        echo '```'
+    } >> "$output_file"
+fi
+
+# Calculate and log runtime
+end_time=$(date +%s)
+elapsed_seconds=$((end_time - start_time))
+elapsed_formatted=$(printf '%02d:%02d:%02d' $((elapsed_seconds / 3600)) $(((elapsed_seconds % 3600) / 60)) $((elapsed_seconds % 60)))
+
+if [ -n "$output_file" ] && [ -f "$output_file" ]; then
+    {
+        echo
+        echo "## Runtime"
+        echo "$elapsed_formatted"
     } >> "$output_file"
 fi
 
 # Notify the user of the saved results
 echo "[+] Scan completed. Results saved to $output_file"
+echo "[+] Total runtime: $elapsed_formatted"

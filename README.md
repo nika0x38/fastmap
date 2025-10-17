@@ -1,6 +1,6 @@
 ### FastMap
 
-`fastmap` is a shell script tool designed to automate the process of quick port mapping using `nmap`. It starts with a rapid scan of all ports to identify open ports and then performs a detailed scan on those ports to identify services and potential vulnerabilities. The results are saved in an `<target-ip>.md` file in the current directory.
+`fastmap` is a shell script tool designed to automate the process of quick port mapping using `nmap`. It starts with a rapid scan of all ports to identify open ports and then performs a detailed scan on those ports to identify services and potential vulnerabilities. The results are saved in an `<target-ip>.txt` file in the current directory.
 
 #### Prerequisites
 
@@ -44,10 +44,10 @@ fastmap -h
 ```
 
 - `fastmap <target_ip>` performs the original TCP workflow: a fast sweep of all ports followed by detailed service detection on anything open.
-- `fastmap -u <target_ip>` runs the TCP workflow and adds a UDP top-ports scan (`sudo nmap -sU -Pn -sV --top-ports 1000 -T4 --reason`).
+- `fastmap -u <target_ip>` runs the TCP workflow and adds a UDP top-ports 1000 scan. Sudo required.
 - `fastmap -h` displays the built-in help message.
 
-All scan results are saved as `<target-ip>.md` in the current directory, with separate sections for TCP and UDP when both scans are executed.
+All scan results are saved as `<target-ip>.txt` in the current directory, with separate sections for TCP and UDP when both scans are executed.
 
 #### Educational Purpose & CTF Usage
 
