@@ -4,11 +4,12 @@
 # Function to display usage instructions
 usage() {
     local exit_code="${1:-0}"
-    echo "Usage: $0 [-u] <IP-TARGET>"
+    echo "Usage: $0 [-u] [-6] <IP-TARGET>"
     echo
     echo "Options:"
     echo "  -h           Display this help message."
     echo "  -u           Include a UDP top-ports scan (requires sudo)."
+    echo "  -6           Enable IPv6 scanning."
     echo
     echo "Description:"
     echo "This script performs a port scan on the target IP using Nmap. It first identifies open ports"
@@ -19,13 +20,17 @@ usage() {
 
 # Parse command-line options
 udp_scan=false
-while getopts ":hu" opt; do
+ipv6_scan=false
+while getopts ":hu6" opt; do
     case "$opt" in
         h)
             usage
             ;;
         u)
             udp_scan=true
+            ;;
+        6)
+            ipv6_scan=true
             ;;
         \?)
             echo "Error: Invalid option -$OPTARG" >&2
@@ -46,6 +51,12 @@ fi
 # Assign the first non-option argument to the variable IP_TARGET
 IP_TARGET=$1
 
+# Set nmap arguments based on flags
+nmap_extra_args=""
+if [ "$ipv6_scan" = "true" ]; then
+    nmap_extra_args="-6"
+fi
+
 if [ "$udp_scan" = "true" ]; then
     echo "[*] UDP scan requested. Validating sudo credentials before scanning..."
     if ! sudo -v >/dev/null 2>&1; then
@@ -59,7 +70,7 @@ start_time=$(date +%s)
 
 # Perform the initial Nmap scan to find open ports
 echo "[*] Scanning for open TCP ports on $IP_TARGET..."
-ports=$(nmap -Pn -p- --min-rate=1000 -T4 "$IP_TARGET" | \
+ports=$(nmap -Pn -p- --min-rate=1000 -T4 $nmap_extra_args "$IP_TARGET" | \
 grep '^[0-9]' | \
 cut -d '/' -f 1 | \
 tr '\n' ',' | \
@@ -78,7 +89,7 @@ if [ -z "$ports" ]; then
     } > "$output_file"
 else
     echo "[*] Performing a detailed TCP scan on the open ports ($ports)..."
-    nmap_output=$(nmap -p"$ports" -Pn -sC -sV "$IP_TARGET")
+    nmap_output=$(nmap -p"$ports" -Pn -sC -sV $nmap_extra_args "$IP_TARGET")
 
     {
         echo "## TCP scan"
@@ -88,7 +99,7 @@ fi
 
 if [ "$udp_scan" = "true" ]; then
     echo "[*] Performing a UDP top-ports 1000 scan on $IP_TARGET..."
-    udp_output=$(sudo nmap -sU -Pn -sV --top-ports 1000 -T4 --reason "$IP_TARGET")
+    udp_output=$(sudo nmap -sU -Pn -sV --top-ports 1000 -T4 --reason $nmap_extra_args "$IP_TARGET")
 
     {
         echo
@@ -102,7 +113,7 @@ end_time=$(date +%s)
 elapsed_seconds=$((end_time - start_time))
 elapsed_formatted=$(printf '%02d:%02d:%02d' $((elapsed_seconds / 3600)) $(((elapsed_seconds % 3600) / 60)) $((elapsed_seconds % 60)))
 
-if [ -n "$output_file" ] && [ -f "$output_file" ]; then
+if [ -f "$output_file" ]; then
     {
         echo
         echo "## Runtime"

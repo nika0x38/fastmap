@@ -41,10 +41,12 @@ After installation, you can use `fastmap` directly from any terminal:
 fastmap <target_ip>
 fastmap -u <target_ip>
 fastmap -h
+fastmap -6
 ```
 
 - `fastmap <target_ip>` performs the original TCP workflow: a fast sweep of all ports followed by detailed service detection on anything open.
 - `fastmap -u <target_ip>` runs the TCP workflow and adds a UDP top-ports 1000 scan. Sudo required.
+- `fastmap -6 <target_ip>` runs the TCP workflow on ipv6. Can be used with -u.
 - `fastmap -h` displays the built-in help message.
 
 All scan results are saved as `<target-ip>.txt` in the current directory, with separate sections for TCP and UDP when both scans are executed.
